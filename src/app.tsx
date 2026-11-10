@@ -38,5 +38,20 @@ export function createApp(config: RigConfig = loadConfig()) {
     );
   });
 
+  // Same reader as the page, same rows in the same order: the two can't disagree (ADR 0001).
+  app.get('/api/digest/:night', (c) => {
+    const night = c.req.param('night');
+    const result = readNight(config.runsDir, night);
+    if (!result.found) {
+      return c.json({ night, error: 'no run log for this night' }, 404);
+    }
+    return c.json({
+      night: result.night,
+      rows: result.rows,
+      counts: result.counts,
+      badLines: result.badLines,
+    });
+  });
+
   return app;
 }
